@@ -21,5 +21,6 @@ def on_fallback(message):
     bot.reply_to(message, response)
 #########################################################
 if __name__ == '__main__':
-    bot.polling(timeout=20)
+    db.Base.metadata.create_all(db.engine)
+    #bot.polling(timeout=20)
 #########################################################

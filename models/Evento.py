@@ -15,10 +15,15 @@ class Evento(db.Base):
     creado_por = Column('creado_por', String(15), ForeignKey('usuario.id', onupdate='CASCADE', ondelete='CASCADE'), nullable=False)
     usuarios   = relationship("Usuario", back_populates="eventos_usuario")
 
-    def __init__ (self, fecha, creado_el, estado_id): 
+    paquete_id = Column('paquete_id', Integer, ForeignKey('paquete.id', onupdate='CASCADE', ondelete='CASCADE'), nullable=False)
+    paquetes   = relationship("Paquete", back_populates="eventos_paquete")
+
+    def __init__ (self, fecha, creado_el, estado_id, creado_por, paquete_id): 
         self.fecha = fecha
         self.creado_el = creado_el 
         self.estado_id = estado_id
+        self.creado_por = creado_por
+        self.paquete_id = paquete_id
 
     def __repr__ (self):
         return f"<Evento {self.id}>"

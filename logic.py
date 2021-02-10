@@ -1,3 +1,9 @@
+from models.Evento import Evento
+from models.Cliente import Cliente
+from models.Estado import Estado
+from models.Paquete import Paquete
+from models.Usuario import Usuario
+
 ###########################################################
 
 def get_welcome_message(bot_data):

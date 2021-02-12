@@ -6,7 +6,7 @@ class Estado(db.Base):
 
     id	= Column('id', Integer, primary_key=True, nullable=False) 
     nombre = Column('nombre', String(100), nullable=False) 
-    orden  = Column('orden', nullable=False) 
+    orden  = Column('orden', Integer, nullable=False) 
 
     def __init__ (self, id, nombre,orden=1): 
         self.id = id

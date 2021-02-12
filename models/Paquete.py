@@ -6,9 +6,9 @@ class Paquete(db.Base):
     __tablename__ 	= 'paquete'
 
     id	               = Column('id', Integer, primary_key=True, autoincrement=True) 
-    numero_guia        = Column('numero_guia', String(20), nullable=False,unique=True) 
-    nombre_remitente   = Column('nombre_remitente', String(100), nullable=False) 
-    peso_kg            = Column('peso_kg', FLOAT(10,2), nullable=False) 
+    numero_guia        = Column('numero_guia', String(20), nullable=True,unique=True) 
+    nombre_remitente   = Column('nombre_remitente', String(100), nullable=True) 
+    peso_kg            = Column('peso_kg', FLOAT(10,2), nullable=True) 
     direccion_destino  = Column('direccion_destino', String(200), nullable=False) 
     direccion_recogida = Column('direccion_recogida', String(200), nullable=False)    
     fecha_estado_actual= Column('fecha_estado_actual', DateTime, server_default=func.now(), nullable=True)

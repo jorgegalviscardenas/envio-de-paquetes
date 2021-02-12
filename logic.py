@@ -1,3 +1,4 @@
+import database.db as db
 from models.Evento import Evento
 from models.Cliente import Cliente
 from models.Estado import Estado
@@ -13,6 +14,16 @@ def get_welcome_message(bot_data):
         "¡Estoy aquí para ayudarte a administrar la información de tus paquetes!"
     )
     return response
+
+
+##########################################################
+#Función que listará los administradores del sistema
+def listar_usuarios():
+    usuarios = db.session.query(Usuario).all()
+
+    #db.session.commit()
+
+    return usuarios
 
 ###########################################################
 

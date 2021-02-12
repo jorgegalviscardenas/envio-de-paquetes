@@ -24,6 +24,22 @@ def on_command_start(message):
         parse_mode="Markdown")
 
 ########################################################
+#Temporal, función para listar los pedidos de un administrador
+
+@bot.message_handler(commands=['listar'])
+def on_list_packages(message):
+    bot.send_chat_action(message.chat.id, 'typing')
+    
+    usuarios = logic.listar_usuarios()
+
+    text = ""
+    
+    for e in usuarios:
+            text += f"| {e.id} | ${e.nombre} ) |\n"
+
+    bot.reply_to(message, text, parse_mode="Markdown")
+
+########################################################
 
 @bot.message_handler(func=lambda message: True)
 def on_fallback(message):

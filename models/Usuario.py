@@ -10,7 +10,7 @@ class Usuario(db.Base):
     apellidos = Column('apellidos', String(50), nullable=False) 
     documento = Column('documento', String(20), nullable=False,unique=True) 
     email = Column('email', String(200), nullable=False) 
-    
+    eventos_creados = relationship("Evento", back_populates="usuario")
     def __init__ (self, id, nombre, documento,email): 
         self.id = id
         self.nombre = nombre 

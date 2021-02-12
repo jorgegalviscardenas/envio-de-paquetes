@@ -11,7 +11,7 @@ class Cliente(db.Base):
     documento = Column('documento', String(20), nullable=True,unique=True) 
     email = Column('email', String(200), nullable=True) 
     telefono = Column('telefono', String(15), nullable=True) 
-    
+    paquetes = relationship("Paquete", back_populates="cliente")
     def __init__ (self, id, nombres,apellidos): 
         self.id = id
         self.nombres = nombres 

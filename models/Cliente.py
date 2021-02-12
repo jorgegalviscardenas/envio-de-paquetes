@@ -1,23 +1,37 @@
 import database.db as db
-from sqlalchemy import Column, Integer, String, Float, Date, DateTime, ForeignKey, func
+from sqlalchemy import Column, String, Float, Date, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship 
-
+import telebot
 class Cliente(db.Base):
     __tablename__ 	= 'cliente'
 
-    id	= Column('id', Integer, primary_key=True, autoincrement=True) 
-    codigo = Column('codigo', String(15), nullable=False,unique=True) 
-    nombre = Column('nombre', String(50), nullable=False) 
-    documento = Column('documento', String(20), nullable=False,unique=True) 
-    email = Column('email', String(200), nullable=False) 
-    telefono = Column('telefono', String(15), nullable=False) 
-    
-    def __init__ (self, codigo, nombre, documento,email,telefono): 
-        self.codigo = codigo
-        self.nombre = nombre 
-        self.documento = documento
-        self.email = email
-        self.telefono = telefono
+    id	= Column('id', String(15), primary_key=True, nullable=False)  
+    nombres = Column('nombres', String(50), nullable=False)
+    apellidos = Column('apellidos', String(50), nullable=False)  
+    documento = Column('documento', String(20), nullable=True,unique=True) 
+    email = Column('email', String(200), nullable=True) 
+    telefono = Column('telefono', String(15), nullable=True) 
+    paquetes = relationship("Paquete", back_populates="cliente")
+    def __init__ (self, id, nombres,apellidos): 
+        self.id = id
+        self.nombres = nombres 
+        self.apellidos = apellidos
 
     def __repr__ (self):
         return f"<Cliente {self.id}>"
+    '''
+    Se encarga de construir el menú como cliente. Si el cliente tiene los datos completas le muestra
+    las opciones que puede realizar sobre los paquetes, si no lo tiene completo solo le muestra la
+    opción de "Registrarse"
+    @return InlineKeyboardMarkup contenedor de las opciones
+    '''
+    def construir_menu(self):
+        markup = telebot.types.InlineKeyboardMarkup()
+        if(self.documento != None and self.email != None and self.telefono != None):
+            markup.add(telebot.types.InlineKeyboardButton(text='Registrar un paquete', callback_data="opcion-2"))
+            markup.add(telebot.types.InlineKeyboardButton(text='Listar mis paquetes', callback_data="opcion-3"))
+            markup.add(telebot.types.InlineKeyboardButton(text='Rastrear un paquete', callback_data="opcion-4"))
+            markup.add(telebot.types.InlineKeyboardButton(text='Cancelar un paquete', callback_data="opcion-5"))
+        else:
+            markup.add(telebot.types.InlineKeyboardButton(text='Registrarse', callback_data="opcion-1"))
+        return markup

@@ -1,6 +1,6 @@
 #########################################################
 
-from config import bot,config
+from config import bot
 import config
 from time import sleep
 import re

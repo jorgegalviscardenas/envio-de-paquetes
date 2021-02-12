@@ -10,9 +10,11 @@ que va a procesar el bot.
 @version 20210209
 '''
 import database.db as db
+from models.Evento import Evento
 from models.Cliente import Cliente
-from models.Usuario import Usuario
 from models.Estado import Estado
+from models.Paquete import Paquete
+from models.Usuario import Usuario
 import telebot
 
 '''

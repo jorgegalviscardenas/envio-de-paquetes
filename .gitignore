@@ -136,3 +136,7 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# bd file
+database/envio_paquetes.sqlite
+*.sqlite

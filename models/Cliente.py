@@ -2,6 +2,16 @@ import database.db as db
 from sqlalchemy import Column, String, Float, Date, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship 
 import telebot
+'''
+Representa un cliente que envia paquetes
+
+@author Sebastian Noreña Marquez <sebastian.norenam@autonoma.edu.co>
+@author Camilo Andres Lengua Duque <camiloa.lenguad@autonoma.eu.co>
+@author Alejandro Gomez Alzate <alejandro.gomez@autonoma.edu.co>
+@author Jorge Galvis Cárdenas <jorge.galvisc@autonoma.edu.co>
+
+@version 20210211
+'''
 class Cliente(db.Base):
     __tablename__ 	= 'cliente'
 

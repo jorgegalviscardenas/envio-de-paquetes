@@ -62,16 +62,15 @@ def construir_opciones_estado():
         markup.add(telebot.types.InlineKeyboardButton(text=estado.nombre, callback_data=estado.id))
     return markup
 
-##########################################################
-#Función que listará los administradores del sistema
-def listar_usuarios():
-    usuarios = db.session.query(Usuario).all()
-
-    #db.session.commit()
-
-    return usuarios
-
-###########################################################
+'''
+Encargado de listar los paqueres con rol administrador
+'''
+def listar_paquetes():
+    paquetes = db.session.query(Paquete).filter(
+            Paquete.estado_actual == 1
+        ).order_by(Paquete.creado_el.asc()).all()
+    
+    return paquetes
 
 '''
 Obtiene el mensaje por defecto que se le muestra al usuario

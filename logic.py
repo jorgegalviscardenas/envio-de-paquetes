@@ -133,6 +133,19 @@ def obtener_cliente_registro(id):
 
 
 '''
+Encargado de listar los paqueres con rol administrador
+'''
+
+
+def listar_paquetes():
+    paquetes = db.session.query(Paquete).filter(
+        Paquete.estado_actual == 1
+    ).order_by(Paquete.creado_el.asc()).all()
+
+    return paquetes
+
+
+'''
 Obtiene el mensaje por defecto que se le muestra al usuario
 cuando no se entendio lo que ingreso
 @return string

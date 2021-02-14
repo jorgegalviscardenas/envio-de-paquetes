@@ -252,7 +252,25 @@ Encargado de recibir la petición de "Listar paquetes" como usuario
 
 @bot.callback_query_handler(lambda call: call.data == "opcion-6")
 def en_listar_paquetes(call):
-    pass
+    paquetes = logic.listar_paquetes()
+
+    if len(paquetes) == 0 :
+        bot.send_message(call.message.chat.id, f"No se encuentran paquetes pendientes por procesar \U0001F609")
+        return
+
+    text = ""
+    total = 0
+    for paq in paquetes:
+        text += f"*Fecha de creación:* {paq.creado_el} \n"
+        text += f"*Número de guía:* {paq.numero_guia} \n"
+        text += f"*Estado:* {paq.estado_actual_objeto.nombre} \n"
+        text += f"*Documento de identidad:* {paq.cliente.documento} \n"
+        text += f"*Cliente:* {paq.cliente.nombres} {paq.cliente.apellidos} \n\n"
+        total += 1
+
+    text += f"*Total de paquetes:* {total}"
+
+    bot.send_message(call.message.chat.id, text, parse_mode="Markdown")
 
 
 '''

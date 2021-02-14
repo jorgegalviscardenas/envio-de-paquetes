@@ -60,9 +60,77 @@ En la cual se completan los datos
 
 
 @bot.callback_query_handler(lambda call: call.data == "opcion-1")
-def en_opcion_registrarse(call):
-    pass
+def en_registrarse(call):
+    pregunta = '¿Cuál es tu número de documento?'
+    markup = telebot.types.ForceReply(selective=False)
+    bot.send_message(call.message.chat.id, pregunta, reply_markup=markup)
 
+
+'''
+Encargado de recibir la respuesta a la pregunta "¿Cuál es tu número de documento?"
+'''
+
+
+@bot.message_handler(func=lambda message: message.reply_to_message != None and message.reply_to_message.text == "¿Cuál es tu número de documento?")
+def en_registrarse_documento(mensaje):
+    bot.send_chat_action(mensaje.chat.id, 'typing')
+    if validadores.contiene_solo_numeros(mensaje.text):
+        cliente = logic.obtener_cliente_registro(mensaje.from_user.id)
+        datos = {'documento': mensaje.text}
+        logic.actualizar_datos_modelo(cliente, datos)
+        pregunta = '¿Cuál es tu número de teléfono?'
+        markup = telebot.types.ForceReply(selective=False)
+        bot.send_message(mensaje.chat.id, pregunta, reply_markup=markup)
+    else:
+        bot.send_message(
+            mensaje.chat.id, "El número de documento solo debe contener números \U00002639. Te vuelvo a preguntar")
+        pregunta = '¿Cuál es tu número de documento?'
+        markup = telebot.types.ForceReply(selective=False)
+        bot.send_message(mensaje.chat.id, pregunta, reply_markup=markup)
+
+
+'''
+Encargado de recibir la respuesta a la pregunta "¿Cuál es tu número de teléfono?"
+'''
+
+
+@bot.message_handler(func=lambda message: message.reply_to_message != None and message.reply_to_message.text == "¿Cuál es tu número de teléfono?")
+def en_registrarse_telefono(mensaje):
+    bot.send_chat_action(mensaje.chat.id, 'typing')
+    if validadores.contiene_solo_numeros(mensaje.text):
+        cliente = logic.obtener_cliente_registro(mensaje.from_user.id)
+        datos = {'telefono': mensaje.text}
+        logic.actualizar_datos_modelo(cliente, datos)
+        pregunta = '¿Cuál es tu email?'
+        markup = telebot.types.ForceReply(selective=False)
+        bot.send_message(mensaje.chat.id, pregunta, reply_markup=markup)
+    else:
+        bot.send_message(
+            mensaje.chat.id, "El número de teléfono solo debe contener números \U00002639. Te vuelvo a preguntar")
+        pregunta = '¿Cuál es tu número de teléfono?'
+        markup = telebot.types.ForceReply(selective=False)
+        bot.send_message(mensaje.chat.id, pregunta, reply_markup=markup)
+
+'''
+Encargado de recibir la respuesta a la pregunta "¿Cuál es tu email?"
+'''
+
+
+@bot.message_handler(func=lambda message: message.reply_to_message != None and message.reply_to_message.text == "¿Cuál es tu email?")
+def en_registrarse_email(mensaje):
+    bot.send_chat_action(mensaje.chat.id, 'typing')
+    if validadores.es_email(mensaje.text):
+        cliente = logic.obtener_cliente_registro(mensaje.from_user.id)
+        datos = {'email': mensaje.text}
+        logic.actualizar_datos_modelo(cliente, datos)
+        respuesta = "Hemos completado tu registro exitosamente \U0001F603. Ejecuta el comando /menu para ver las nuevas opciones."
+        bot.send_message(mensaje.chat.id, respuesta)
+    else:
+        bot.send_message(
+            mensaje.chat.id, "La dirección de email ingresada no es válida \U00002639. Te vuelvo a preguntar")
+        pregunta = '¿Cuál es tu email?'
+        markup = telebot.types.ForceReply(selective=False)
+        bot.send_message(mensaje.chat.id, pregunta, reply_markup=markup)
 
 '''
 Encargado de recibir la petición de "Registrar un paquete" como cliente
@@ -86,7 +154,7 @@ def en_registrar_paquete_remitente(mensaje):
     bot.send_chat_action(mensaje.chat.id, 'typing')
     paquete = logic.obtener_paquete_creacion(mensaje.from_user.id)
     datos = {'nombre_remitente': mensaje.text}
-    logic.actualizar_datos_paquete(paquete, datos)
+    logic.actualizar_datos_modelo(paquete, datos)
     pregunta = '¿En kilogramos cuánto pesa tu paquete?'
     markup = telebot.types.ForceReply(selective=False)
     bot.send_message(mensaje.chat.id, pregunta, reply_markup=markup)
@@ -100,19 +168,20 @@ Encargado de recibir la respuesta a la pregunta "¿En kilogramos cuánto pesa tu
 @bot.message_handler(func=lambda message: message.reply_to_message != None and message.reply_to_message.text == "¿En kilogramos cuánto pesa tu paquete?")
 def en_registrar_paquete_peso(mensaje):
     bot.send_chat_action(mensaje.chat.id, 'typing')
-    print(validadores.es_numero(mensaje.text))
     if validadores.es_numero(mensaje.text) and float(mensaje.text) > 0:
         paquete = logic.obtener_paquete_creacion(mensaje.from_user.id)
         datos = {'peso_kg': mensaje.text}
-        logic.actualizar_datos_paquete(paquete, datos)
+        logic.actualizar_datos_modelo(paquete, datos)
         pregunta = '¿A qué dirección quieres mandar el paquete?'
         markup = telebot.types.ForceReply(selective=False)
         bot.send_message(mensaje.chat.id, pregunta, reply_markup=markup)
     else:
-        bot.send_message(mensaje.chat.id, "El valor ingresado debe ser un número mayor a cero \U00002639. Te vuelvo a preguntar")
+        bot.send_message(
+            mensaje.chat.id, "El peso ingresado debe ser un número mayor a cero \U00002639. Te vuelvo a preguntar")
         pregunta = '¿En kilogramos cuánto pesa tu paquete?'
         markup = telebot.types.ForceReply(selective=False)
         bot.send_message(mensaje.chat.id, pregunta, reply_markup=markup)
+
 
 '''
 Encargado de recibir la respuesta a la pregunta "¿A qué dirección quieres mandar el paquete?"
@@ -124,7 +193,7 @@ def en_registrar_paquete_direccion_envio(mensaje):
     bot.send_chat_action(mensaje.chat.id, 'typing')
     paquete = logic.obtener_paquete_creacion(mensaje.from_user.id)
     datos = {'direccion_destino': mensaje.text}
-    logic.actualizar_datos_paquete(paquete, datos)
+    logic.actualizar_datos_modelo(paquete, datos)
     pregunta = '¿En qué dirección quieres que recojamos el paquete?'
     markup = telebot.types.ForceReply(selective=False)
     bot.send_message(mensaje.chat.id, pregunta, reply_markup=markup)
@@ -141,7 +210,7 @@ def en_registrar_paquete_direccion_recogida(mensaje):
     paquete = logic.obtener_paquete_creacion(mensaje.from_user.id)
     datos = {'direccion_recogida': mensaje.text, 'estado_actual': Estado.ESTADO_GENERADO,
              'creado_el': datetime.now(), 'fecha_estado_actual': datetime.now(), 'numero_guia': logic.generar_numero_guia()}
-    logic.actualizar_datos_paquete(paquete, datos)
+    logic.actualizar_datos_modelo(paquete, datos)
     respuesta = "Hemos registrado tu paquete exitosamente \U0001F603"
     bot.send_message(mensaje.chat.id, respuesta)
 

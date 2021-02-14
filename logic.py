@@ -98,14 +98,14 @@ def obtener_paquete_creacion(id):
 
 '''
 Actualiza datos de un paquete
-@param Paquete paquete El paquete sobre el cual se hacen las actualizaciones
-@param Dict datos Los datos que se actualizan en el paquete
+@param Base modelo El modelo sobre el cual se hacen las actualizaciones
+@param Dict datos Los datos que se actualizan del modelo en la base de datos
 '''
 
 
-def actualizar_datos_paquete(paquete, datos):
+def actualizar_datos_modelo(modelo, datos):
     for llave, valor in datos.items():
-        setattr(paquete, llave, valor)
+        setattr(modelo, llave, valor)
     db.session.commit()
 
 
@@ -118,6 +118,18 @@ Encargado de generar el número de guía para el paquete. La generación es alea
 def generar_numero_guia():
     letters = string.digits
     return ''.join(random.choice(letters) for i in range(10))
+
+
+'''
+Obtiene el cliente que se va a terminar de registrar
+@param string id identificador del cliente
+@return Cliente El cliente encontrado
+'''
+
+
+def obtener_cliente_registro(id):
+    cliente = db.session.query(Cliente).get(id)
+    return cliente
 
 
 '''

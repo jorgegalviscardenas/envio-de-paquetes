@@ -144,6 +144,19 @@ def listar_paquetes():
 
     return paquetes
 
+'''
+Obtiene los paquetes de un determinado cliente
+@param string id identificador del cliente
+@return listado de paquetes del cliente
+'''
+
+def listar_mis_paquetes(id):
+    paquetes = db.session.query(Paquete).filter(
+        Paquete.cliente_id == id,
+        Paquete.estado_actual_objeto!=None
+    ).order_by(Paquete.estado_actual.asc()).order_by(Paquete.creado_el.asc()).all()
+    return paquetes
+
 
 '''
 Obtiene el mensaje por defecto que se le muestra al usuario

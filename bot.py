@@ -222,9 +222,20 @@ Encargado de recibir la petición de "Listar mis paquetes" como cliente
 
 @bot.callback_query_handler(lambda call: call.data == "opcion-3")
 def en_listar_mis_paquetes(call):
-    pass
+    paquetes = logic.listar_mis_paquetes(call.message.chat.id)
 
+    if len(paquetes) == 0 :
+        bot.send_message(call.message.chat.id, f"Usted no ha registrado paquetes \U0001F609")
+        return
 
+    text = ""
+    for paq in paquetes:
+        text += f"*Fecha de creación:* {paq.creado_el} \n"
+        text += f"*Dirección de destino:* {paq.direccion_destino} \n"
+        text += f"*Remitente:* {paq.nombre_remitente} \n"
+        text += f"*Estado actual:* {paq.estado_actual_objeto.nombre} \n"
+        text += f"*Fecha del estado actual:* {paq.fecha_estado_actual} \n\n"
+    bot.send_message(call.message.chat.id, text, parse_mode="Markdown")
 '''
 Encargado de recibir la petición de "Rastrear un paquete" como cliente
 '''
@@ -243,6 +254,8 @@ Encargado de recibir la petición de "Cancelar un paquete" como cliente
 @bot.callback_query_handler(lambda call: call.data == "opcion-5")
 def en_cancelar_un_paquete(call):
     pass
+
+
 
 
 '''

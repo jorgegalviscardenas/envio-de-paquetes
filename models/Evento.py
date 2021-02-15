@@ -12,7 +12,7 @@ class Evento(db.Base):
                        server_default=func.now(), nullable=True)
 
     estado_id = Column('estado_id', Integer, ForeignKey(
-        'estado.id', onupdate='CASCADE', ondelete='CASCADE'), nullable=False)
+        'estado.id', onupdate='CASCADE', ondelete='CASCADE'), nullable=True)
     estado = relationship("Estado", back_populates="eventos")
 
     creado_por = Column('creado_por', String(15), ForeignKey(

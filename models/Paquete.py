@@ -17,7 +17,7 @@ class Paquete(db.Base):
     cliente_id = Column('cliente_id', String(15), ForeignKey('cliente.id', onupdate='CASCADE', ondelete='CASCADE'), nullable=False)
     cliente	= relationship("Cliente", back_populates="paquetes")
     
-    estado_actual = Column('estado_id', String(15), ForeignKey('estado.id', onupdate='CASCADE', ondelete='CASCADE'), nullable=True)
+    estado_actual = Column('estado_actual', String(15), ForeignKey('estado.id', onupdate='CASCADE', ondelete='CASCADE'), nullable=True)
     estado_actual_objeto	= relationship("Estado", back_populates="paquetes_estado_actual")
     eventos = relationship("Evento", back_populates="paquete")
     def __init__ (self, numero_guia, nombre_remitente, peso_kg,direccion_destino,direccion_recogida,fecha_estado_actual): 

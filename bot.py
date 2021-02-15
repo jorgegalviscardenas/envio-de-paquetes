@@ -124,17 +124,36 @@ Encargado de recibir la petición de "Cambiar estado a un paquete" como usuario
 '''
 @bot.callback_query_handler(lambda call: call.data == "opcion-7")
 def en_cambiar_estado_paquete(call):
-    markup = logic.construir_opciones_estado()
-    bot.send_message(call.message.chat.id, text="¿A qué estado quieres cambiar el paquete?", reply_markup=markup)
-    pass
+    markup = telebot.types.ForceReply(selective=False)
+    bot.send_message(call.message.chat.id, text="¿A qué paquete quieres cambiar el estado?", reply_markup=markup)
+
+@bot.message_handler(func=lambda message: message.reply_to_message != None and message.reply_to_message.text == "¿A qué paquete quieres cambiar el estado?")
+def en_cambiar_estado_paquete_guia(message):
+    nguia = message.text
+    resp = logic.evento_paquete_guia(message.chat.id, nguia)
+    if resp == "OK":
+        markup = logic.construir_opciones_estado()
+        bot.send_message(message.chat.id, text="¿A qué estado quieres cambiar el paquete?", reply_markup=markup)
+    else:
+        bot.send_message(message.chat.id, resp, parse_mode="Markdown")
 
 '''
-Encargado de recibir la respuesta del a estado a "Cambiar estado a un paquete" como usuario
+Encargado de recibir la respuesta del estado a "Cambiar estado a un paquete" como usuario
 '''
 @bot.callback_query_handler(lambda call: call.message != None and call.message.text == "¿A qué estado quieres cambiar el paquete?")
 def en_cambiar_estado_paquete_estado(call):
-    print(call.data)
-    pass
+    markup = telebot.types.ForceReply(selective=False)
+    resp = logic.update_evento_estado_id(call.message.chat.id, call.data)
+    if resp == "OK":
+        bot.send_message(call.message.chat.id, text="¿Cuál es la fecha y la hora en la que se cambió de estado el paquete?", reply_markup=markup)
+    else:
+        bot.send_message(call.message.chat.id, resp, parse_mode="Markdown")
+
+@bot.message_handler(func=lambda message: message.reply_to_message != None and message.reply_to_message.text == "¿Cuál es la fecha y la hora en la que se cambió de estado el paquete?")
+def en_cambiar_estado_paquete_fecha(message):
+    fecha = message.text
+    logic.update_evento_fecha(message.chat.id, fecha)
+    bot.send_message(message.chat.id, f"\U00002705 Se ha cambiado el estado del paquete con éxito.", parse_mode="Markdown")
 
 '''
 Encargado de recibir la petición de "Eliminar estado de un paquete" como usuario

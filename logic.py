@@ -18,18 +18,22 @@ from models.Paquete import Paquete
 from models.Usuario import Usuario
 from datetime import datetime
 import telebot
+import random
+import string
 
 '''
 Construye el menú de acuerdo si es un usuario del sistema o un cliente
-@param string id identificador del menu
+@param string id identificador del usuario
 @return markup con las opciones que puede hacer en el bot
 '''
-def construir_menu(id): 
+
+
+def construir_menu(id):
     usuario = db.session.query(Usuario).get(id)
     db.session.commit()
     if usuario == None:
         cliente = db.session.query(Cliente).get(id)
-        db.session.commit() 
+        db.session.commit()
         if cliente != None:
             return cliente.construir_menu()
         else:
@@ -37,39 +41,120 @@ def construir_menu(id):
     else:
         return usuario.construir_menu()
 
+
 '''
 Encargado de crear el cliente. Solo se crea si no existe como usuario ni como cliente
 @param string id identificador del usuario en Telegram
 @param string nombres nombres del usuario en Telegram
 @param string apellidos apellidos del usuario en Telegram
 '''
-def registrar_cliente(id,nombres,apellidos):
+
+
+def registrar_cliente(id, nombres, apellidos):
     usuario = db.session.query(Usuario).get(id)
     db.session.commit()
     if usuario == None:
         cliente = db.session.query(Cliente).get(id)
         db.session.commit()
         if cliente == None:
-            cliente = Cliente(id,nombres,apellidos)
+            cliente = Cliente(id, nombres, apellidos)
             db.session.add(cliente)
             db.session.commit()
+
 
 '''
 Encargado de construir las opciones para estado que se tiene
 '''
+
+
 def construir_opciones_estado():
     markup = telebot.types.InlineKeyboardMarkup()
     estados = db.session.query(Estado).all()
     for estado in estados:
-        markup.add(telebot.types.InlineKeyboardButton(text=estado.nombre, callback_data=estado.id))
+        markup.add(telebot.types.InlineKeyboardButton(
+            text=estado.nombre, callback_data=estado.id))
     return markup
+
+
+'''
+Obtiene el paquete que se va a registrar para un usuario especifico.
+En caso de que haya un paquete pendiente toma ese, sino crea uno
+@param string id identificador del cliente
+@return Paquete el paquete que se encontró o se creo
+'''
+
+
+def obtener_paquete_creacion(id):
+    paquete = db.session.query(Paquete).filter_by(
+        cliente_id=id
+    ).filter_by(
+        estado_actual=None
+    ).first()
+    db.session.commit()
+    if not paquete:
+        paquete = Paquete(id)
+        db.session.add(paquete)
+        db.session.commit()
+    return paquete
+
+
+'''
+Actualiza datos de un paquete
+@param Base modelo El modelo sobre el cual se hacen las actualizaciones
+@param Dict datos Los datos que se actualizan del modelo en la base de datos
+'''
+
+
+def actualizar_datos_modelo(modelo, datos):
+    for llave, valor in datos.items():
+        setattr(modelo, llave, valor)
+    db.session.commit()
+
+
+'''
+Encargado de generar el número de guía para el paquete. La generación es aleatoria
+@return string cadena de 10 digitos
+'''
+
+
+def generar_numero_guia():
+    letters = string.digits
+    return ''.join(random.choice(letters) for i in range(10))
+
+
+'''
+Obtiene el cliente que se va a terminar de registrar
+@param string id identificador del cliente
+@return Cliente El cliente encontrado
+'''
+
+
+def obtener_cliente_registro(id):
+    cliente = db.session.query(Cliente).get(id)
+    return cliente
+
+
+'''
+Encargado de listar los paqueres con rol administrador
+'''
+
+
+def listar_paquetes():
+    paquetes = db.session.query(Paquete).filter(
+        Paquete.estado_actual == 1
+    ).order_by(Paquete.creado_el.asc()).all()
+
+    return paquetes
+
 
 '''
 Obtiene el mensaje por defecto que se le muestra al usuario
 cuando no se entendio lo que ingreso
 @return string
 '''
-def get_fallback_message (text):
+
+
+def get_fallback_message(text):
     response = f"\U0001F648 No entendí lo que me acabas de decir"
     return response
 
@@ -83,10 +168,11 @@ def evento_paquete_guia (usua_id, nguia):
     paquete = get_paquete_numero_guia(nguia)
     if not paquete:
         return f"\U0000274C No existe un paquete para el número de guía indicado."
-    if paquete.estado_actual == "6":
+    if paquete.estado_actual == 6:
         return f"\U0000274C Este paquete ya se encuentra entregado y no se le pueden agregar más eventos."
 
     evento = get_evento_id_creado_por_paquete_id(usua_id, paquete.id)
+    #valida si un evento ya existe para no crear varios eventos incompletos
     if not evento:    
         evento = Evento(
             None,
@@ -107,7 +193,7 @@ def evento_paquete_guia (usua_id, nguia):
     return "OK"
 
 '''
-Actualiar un evento de un usuario para asignarle un estado
+Actualizar un evento de un usuario para asignarle un estado
 @param usua_id integer
 @param estado_id integer
 return boolean
@@ -129,26 +215,29 @@ def update_evento_estado_id (usua_id, estado_id):
     return "OK"
 
 '''
-Actualiar un evento de un usuario para asignarle la fecha
+Actualizar un evento de un usuario para asignarle la fecha
 @param usua_id integer
-@param fecha string
+@param arrFecha Array<string>
 return boolean
 '''
-def update_evento_fecha (usua_id, fecha):
+def update_evento_fecha (usua_id, arrFecha):
     evento = get_evento_creado_por(usua_id)
     if not evento:
-        return False
+        return f"\U0000274C Error, asegúrese de estar cambiando el estado de un solo paquete y vuelva a intentarlo."
 
     paquete = evento.paquete
-
-    evento.fecha = datetime(2021,2,14,19,55,30)
+    try:
+        evento.fecha = datetime(int(arrFecha[1]),int(arrFecha[2]),int(arrFecha[3]),int(arrFecha[4]),int(arrFecha[5]),0)
+    except:
+        return f"\U0000274C Error, asegúrese de estar ingresando la fecha en el formato (yyyy-MM-dd HH:mm)\U0000274C"
 
     paquete.estado_actual = evento.estado_id
     paquete.fecha_estado_actual = datetime.now()
+    evento.creado_el = datetime.now()
 
     db.session.commit()
 
-    return True
+    return "OK"
 
 '''
 Obtener un paquete por número de guia

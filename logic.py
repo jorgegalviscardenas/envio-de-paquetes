@@ -21,6 +21,8 @@ import telebot
 import random
 import string
 
+ID_ENTREGADO = 6
+
 '''
 Construye el menú de acuerdo si es un usuario del sistema o un cliente
 @param string id identificador del usuario
@@ -181,7 +183,7 @@ def evento_paquete_guia (usua_id, nguia):
     paquete = get_paquete_numero_guia(nguia)
     if not paquete:
         return f"\U0000274C No existe un paquete para el número de guía indicado."
-    if paquete.estado_actual == 6:
+    if paquete.estado_actual == ID_ENTREGADO:
         return f"\U0000274C Este paquete ya se encuentra entregado y no se le pueden agregar más eventos."
 
     evento = get_evento_id_creado_por_paquete_id(usua_id, paquete.id)

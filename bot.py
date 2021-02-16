@@ -10,6 +10,8 @@ import telebot
 from models.Estado import Estado
 from datetime import datetime
 import validadores
+
+RESPUESTA_OK = "OK"
 #########################################################
 # Aquí vendrá la implementación de la lógica del bot
 #########################################################
@@ -304,7 +306,7 @@ Encargado de recibir la respuesta de "Digite el número de guía del paquete al 
 def en_cambiar_estado_paquete_guia(message):
     nguia = message.text
     resp = logic.evento_paquete_guia(message.chat.id, nguia)
-    if resp == "OK":
+    if resp == RESPUESTA_OK:
         markup = logic.construir_opciones_estado()
         bot.send_message(message.chat.id, text="¿A qué estado quieres cambiar el paquete?", reply_markup=markup)
     else:
@@ -319,7 +321,7 @@ Encargado de recibir la respuesta de "¿A qué estado quieres cambiar el paquete
 def en_cambiar_estado_paquete_estado(call):
     markup = telebot.types.ForceReply(selective=False)
     resp = logic.update_evento_estado_id(call.message.chat.id, call.data)
-    if resp == "OK":
+    if resp == RESPUESTA_OK:
         bot.send_message(call.message.chat.id, text="¿Cuál es la fecha y la hora en la que se cambió de estado el paquete?(YYYY-MM-DD HH:mm)", reply_markup=markup)
     else:
         bot.send_message(call.message.chat.id, resp, parse_mode="Markdown")
@@ -335,7 +337,7 @@ def en_cambiar_estado_paquete_fecha(message):
         message.text,
         re.IGNORECASE)
     resp = logic.update_evento_fecha(message.chat.id, parts)
-    if resp == "OK":
+    if resp == RESPUESTA_OK:
         bot.send_message(message.chat.id, f"\U00002705 Se ha cambiado el estado del paquete con éxito.", parse_mode="Markdown")
     else:
         bot.reply_to(message, resp, parse_mode="Markdown")

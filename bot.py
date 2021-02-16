@@ -255,8 +255,22 @@ Encargado de recibir la petición de "Cancelar un paquete" como cliente
 
 @bot.callback_query_handler(lambda call: call.data == "opcion-5")
 def en_cancelar_un_paquete(call):
-    pass
+    markup = telebot.types.ForceReply(selective=False)
+    bot.send_message(call.message.chat.id, text="Digite el número de guía del paquete que desea cancelar", reply_markup=markup)
 
+'''
+Encargado de recibir la respuesta de "Digite el número de guía del paquete que desea cancelar"
+'''
+
+@bot.message_handler(func=lambda message: message.reply_to_message != None and message.reply_to_message.text == "Digite el número de guía del paquete que desea cancelar")
+def en_cancelar_paquete(message):
+    nguia = message.text
+    resp = logic.evento_paquete_guia(message.chat.id, nguia)
+    if resp == RESPUESTA_OK:
+        markup = logic.construir_opciones_estado()
+        bot.send_message(message.chat.id, f"\U00002705 Paquete eliminado correctamente.", parse_mode="Markdown")
+    else:
+        bot.send_message(message.chat.id, resp, parse_mode="Markdown")
 
 
 

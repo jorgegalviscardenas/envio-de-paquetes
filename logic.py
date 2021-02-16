@@ -22,6 +22,8 @@ import random
 import string
 
 ID_ENTREGADO = 6
+ID_GENERADO = 1
+ID_ASIGNADO = 2
 
 '''
 Construye el menú de acuerdo si es un usuario del sistema o un cliente
@@ -319,3 +321,46 @@ def get_evento_id_creado_por_paquete_id(usua_id, paquete_id):
     db.session.commit()
     
     return evento
+
+
+'''
+Obtener un paquete por número de guia e id de usuario
+@param numero_guia string 
+@param cliente_id string
+@return Paquete
+'''
+def get_paquete_numero_guia_cliente_id (nguia, cliente_id):
+    paquete = db.session.query(Paquete
+        ).filter_by(numero_guia=nguia
+        ).filter_by(cliente_id=cliente_id
+        ).first()
+    
+    db.session.commit()
+
+    return paquete
+
+'''
+Eliminar un paquete que aún no se ha recogido
+@param usua_id integer
+@param nguia string
+return string
+'''
+def evento_paquete_guia (usua_id, nguia):
+    paquete = get_paquete_numero_guia_cliente_id(nguia, usua_id)
+    if not paquete:
+        return f"\U0000274C No existe un paquete para el número de guía indicado."
+    if paquete.estado_actual != ID_GENERADO and paquete.estado_actual != ID_ASIGNADO:
+        return f"\U0000274C El paquete con número de guía {paquete.numero_guia} no se puede eliminar ya que se encuentra en estado {paquete.estado_actual_objeto.nombre}."
+
+
+    #Elimino los eventos relacionados al paquete
+    db.session.query(Evento
+        ).filter_by(paquete_id=paquete.id
+        ).delete()
+    db.session.commit()
+
+    #Elimino el paquete
+    db.session.delete(paquete)
+    db.session.commit()
+
+    return "OK"

@@ -268,7 +268,7 @@ def en_listar_paquetes(call):
     paquetes = logic.listar_paquetes()
 
     if len(paquetes) == 0 :
-        bot.send_message(call.message.chat.id, f"No se encuentran paquetes pendientes por procesar \U0001F609")
+        bot.send_message(call.message.chat.id, f"No se encuentran paquetes sin entregar \U0001F609")
         return
 
     text = ""

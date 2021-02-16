@@ -17,7 +17,7 @@ class Cliente(db.Base):
 
     id	= Column('id', String(15), primary_key=True, nullable=False)  
     nombres = Column('nombres', String(50), nullable=False)
-    apellidos = Column('apellidos', String(50), nullable=False)  
+    apellidos = Column('apellidos', String(50), nullable=True)  
     documento = Column('documento', String(20), nullable=True,unique=True) 
     email = Column('email', String(200), nullable=True) 
     telefono = Column('telefono', String(15), nullable=True) 

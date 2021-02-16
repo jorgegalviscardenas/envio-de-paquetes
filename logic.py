@@ -141,7 +141,7 @@ Encargado de listar los paqueres con rol administrador
 
 def listar_paquetes():
     paquetes = db.session.query(Paquete).filter(
-        Paquete.estado_actual == 1
+        Paquete.estado_actual != 6
     ).order_by(Paquete.creado_el.asc()).all()
 
     return paquetes

@@ -244,11 +244,46 @@ def en_listar_mis_paquetes(call):
 Encargado de recibir la petición de "Rastrear un paquete" como cliente
 '''
 
-
 @bot.callback_query_handler(lambda call: call.data == "opcion-4")
 def en_rastrear_un_paquete(call):
-    pass
+    markup = telebot.types.ForceReply(selective=False)
+    bot.send_message(call.message.chat.id, text="Digite el número de guía del paquete que desea rastrear", reply_markup=markup)
 
+'''
+Encargado de recibir la respuesta de "Digite el número de guía del paquete que desea rastrear"
+'''
+
+@bot.message_handler(func=lambda message: message.reply_to_message != None and message.reply_to_message.text == "Digite el número de guía del paquete que desea rastrear")
+def en_rastrear_paquete(message):
+    nguia = message.text
+    if validadores.es_numero(nguia) and len(nguia) ==10:
+        paquete = logic.get_paquete_numero_guia_cliente_id(nguia,message.chat.id)
+        if not paquete:
+            bot.send_message(message.chat.id, f"\U0000274C No existe un paquete para el número de guía *{nguia}*.", parse_mode="Markdown")
+        else:
+            peso = "{0:.2f}".format(paquete.peso_kg)
+            text = ""
+            text += f"*Fecha de creación:* {paquete.creado_el} \n"
+            text += f"*Dirección de recogida:* {paquete.direccion_recogida} \n"
+            text += f"*Dirección de destino:* {paquete.direccion_destino} \n"
+            text += f"*Peso:* {peso} *KG* \n"
+            text += f"*Remitente:* {paquete.nombre_remitente} \n"
+            text += f"*Estado actual:* {paquete.estado_actual_objeto.nombre} \n"
+            text += f"*Fecha del estado actual:* {paquete.fecha_estado_actual} \n\n"
+            bot.send_message(message.chat.id, text, parse_mode="Markdown")
+    elif not validadores.es_numero(nguia):
+        bot.send_message(message.chat.id, "El número de guía debe ser un valor numérico \U00002639. Te vuelvo a solicitar la información")
+        pregunta = 'Digite el número de guía del paquete que desea rastrear'
+        markup = telebot.types.ForceReply(selective=False)
+        bot.send_message(message.chat.id, pregunta, reply_markup=markup)
+    elif len(nguia) != 10:
+        bot.send_message(message.chat.id, "El número de guía debe tener 10 dígitos  \U00002639. Te vuelvo a solicitar la información")
+        pregunta = 'Digite el número de guía del paquete que desea rastrear'
+        markup = telebot.types.ForceReply(selective=False)
+        bot.send_message(message.chat.id, pregunta, reply_markup=markup)
+
+
+    
 
 '''
 Encargado de recibir la petición de "Cancelar un paquete" como cliente

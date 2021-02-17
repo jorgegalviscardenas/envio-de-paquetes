@@ -210,9 +210,11 @@ Encargado de recibir la respuesta a la pregunta "¿En qué dirección quieres qu
 def en_registrar_paquete_direccion_recogida(mensaje):
     bot.send_chat_action(mensaje.chat.id, 'typing')
     paquete = logic.obtener_paquete_creacion(mensaje.from_user.id)
+    fecha = datetime.now()
     datos = {'direccion_recogida': mensaje.text, 'estado_actual': Estado.ESTADO_GENERADO,
-             'creado_el': datetime.now(), 'fecha_estado_actual': datetime.now(), 'numero_guia': logic.generar_numero_guia()}
+             'creado_el': fecha, 'fecha_estado_actual': fecha, 'numero_guia': logic.generar_numero_guia()}
     logic.actualizar_datos_modelo(paquete, datos)
+    logic.crear_evento_generado(paquete.id,fecha,fecha)
     respuesta = f"Hemos registrado tu paquete exitosamente \U0001F603. El número de guía es: *{paquete.numero_guia}*"
     bot.send_message(mensaje.chat.id, respuesta,parse_mode="Markdown")
 

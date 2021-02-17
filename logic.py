@@ -364,3 +364,21 @@ def evento_paquete_guia (usua_id, nguia):
     db.session.commit()
 
     return "OK"
+'''
+Crea el evento de generado para un paquete
+@param integer paquete_id identificador del paquete
+@param datetime fecha fecha en la que se asignó el estado
+@param datetime creado_el fecha en la que se creó el registro
+'''
+def crear_evento_generado(paquete_id,fecha,creado_el):
+    evento = Evento(
+    fecha,
+    creado_el,
+    Estado.ESTADO_GENERADO,
+    None,
+    paquete_id)
+    db.session.add(evento)
+        
+    db.session.commit()
+
+    return evento

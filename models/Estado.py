@@ -36,6 +36,9 @@ class Estado(db.Base):
     @var [Paquete] Listado de paquetes que tienen este estado
     '''
     paquetes_estado_actual = relationship("Paquete", back_populates="estado_actual_objeto")
+    '''
+    @const el identificador de un estado generado
+    '''
     ESTADO_GENERADO = 1
     '''
     Constructor

@@ -218,7 +218,7 @@ def update_evento_estado_id (usua_id, estado_id):
 
     paquete = evento.paquete
 
-    if estado_id == paquete.estado_actual:
+    if int(estado_id) == paquete.estado_actual:
         return f"\U0000274C El paquete ya se encuentra en este estado, se debe cambiar a un estado diferente."
 
     evento.estado_id = estado_id

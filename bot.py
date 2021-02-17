@@ -338,7 +338,7 @@ def en_cambiar_estado_paquete_estado(call):
     markup = telebot.types.ForceReply(selective=False)
     resp = logic.update_evento_estado_id(call.message.chat.id, call.data)
     if resp == RESPUESTA_OK:
-        bot.send_message(call.message.chat.id, text="¿Cuál es la fecha y la hora en la que se cambió de estado el paquete?(YYYY-MM-DD HH:mm)", reply_markup=markup)
+        bot.send_message(call.message.chat.id, text="¿Cuál es la fecha y la hora en la que se cambió de estado el paquete?(yyyy-MM-dd HH:mm)", reply_markup=markup)
     else:
         bot.send_message(call.message.chat.id, resp, parse_mode="Markdown")
 
@@ -357,7 +357,7 @@ def en_cambiar_estado_paquete_fecha(message):
         bot.send_message(message.chat.id, f"\U00002705 Se ha cambiado el estado del paquete con éxito.", parse_mode="Markdown")
     else:
         bot.reply_to(message, resp, parse_mode="Markdown")
-        bot.send_message(message.chat.id, text="¿Cuál es la fecha y la hora en la que se cambió de estado el paquete?(YYYY-MM-DD HH:mm)", reply_markup=telebot.types.ForceReply(selective=False))
+        bot.send_message(message.chat.id, text="¿Cuál es la fecha y la hora en la que se cambió de estado el paquete?(yyyy-MM-dd HH:mm)", reply_markup=telebot.types.ForceReply(selective=False))
 
 
 '''

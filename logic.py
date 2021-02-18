@@ -345,7 +345,7 @@ Eliminar un paquete que aún no se ha recogido
 @param nguia string
 return string
 '''
-def evento_paquete_guia (usua_id, nguia):
+def delete_evento_paquete_guia (usua_id, nguia):
     paquete = get_paquete_numero_guia_cliente_id(nguia, usua_id)
     if not paquete:
         return f"\U0000274C No existe un paquete para el número de guía indicado."

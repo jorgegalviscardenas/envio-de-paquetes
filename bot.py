@@ -263,9 +263,9 @@ Encargado de recibir la respuesta de "Digite el número de guía del paquete que
 '''
 
 @bot.message_handler(func=lambda message: message.reply_to_message != None and message.reply_to_message.text == "Digite el número de guía del paquete que desea cancelar")
-def en_cancelar_paquete(message):
+def en_cancelar_un_paquete_guia(message):
     nguia = message.text
-    resp = logic.evento_paquete_guia(message.chat.id, nguia)
+    resp = logic.delete_evento_paquete_guia(message.chat.id, nguia)
     if resp == RESPUESTA_OK:
         markup = logic.construir_opciones_estado()
         bot.send_message(message.chat.id, f"\U00002705 Paquete eliminado correctamente.", parse_mode="Markdown")

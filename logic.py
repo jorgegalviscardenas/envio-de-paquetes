@@ -261,7 +261,7 @@ def update_evento_fecha(usua_id, arrFecha):
         return f"\U0000274C Error, asegúrese de estar ingresando la fecha en el formato (yyyy-MM-dd HH:mm)\U0000274C"
 
     paquete.estado_actual = evento.estado_id
-    paquete.fecha_estado_actual = datetime.now()
+    paquete.fecha_estado_actual = evento.fecha
     evento.creado_el = datetime.now()
 
     db.session.commit()

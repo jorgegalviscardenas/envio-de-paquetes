@@ -145,7 +145,7 @@ Encargado de listar los paqueres con rol administrador
 
 def listar_paquetes():
     paquetes = db.session.query(Paquete).filter(
-        Paquete.estado_actual != 6
+        Paquete.estado_actual != ID_ENTREGADO
     ).order_by(Paquete.creado_el.asc()).all()
 
     return paquetes
@@ -222,7 +222,7 @@ def update_evento_estado_id (usua_id, estado_id):
 
     paquete = evento.paquete
 
-    if estado_id == paquete.estado_actual:
+    if int(estado_id) == paquete.estado_actual:
         return f"\U0000274C El paquete ya se encuentra en este estado, se debe cambiar a un estado diferente."
 
     evento.estado_id = estado_id
@@ -364,3 +364,21 @@ def delete_evento_paquete_guia (usua_id, nguia):
     db.session.commit()
 
     return "OK"
+'''
+Crea el evento de generado para un paquete
+@param integer paquete_id identificador del paquete
+@param datetime fecha fecha en la que se asignó el estado
+@param datetime creado_el fecha en la que se creó el registro
+'''
+def crear_evento_generado(paquete_id,fecha,creado_el):
+    evento = Evento(
+    fecha,
+    creado_el,
+    Estado.ESTADO_GENERADO,
+    None,
+    paquete_id)
+    db.session.add(evento)
+        
+    db.session.commit()
+
+    return evento

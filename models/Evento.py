@@ -16,7 +16,7 @@ class Evento(db.Base):
     estado = relationship("Estado", back_populates="eventos")
 
     creado_por = Column('creado_por', String(15), ForeignKey(
-        'usuario.id', onupdate='CASCADE', ondelete='CASCADE'), nullable=False)
+        'usuario.id', onupdate='CASCADE', ondelete='CASCADE'), nullable=True)
     usuario = relationship("Usuario", back_populates="eventos_creados")
 
     paquete_id = Column('paquete_id', Integer, ForeignKey(

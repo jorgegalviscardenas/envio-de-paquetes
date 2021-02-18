@@ -10,13 +10,13 @@ que va a procesar el bot.
 @version 20210209
 '''
 import database.db as db
-from sqlalchemy import desc,func
+from sqlalchemy import desc, func
 from models.Evento import Evento
 from models.Cliente import Cliente
 from models.Estado import Estado
 from models.Paquete import Paquete
 from models.Usuario import Usuario
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 import telebot
 import random
 import string
@@ -372,7 +372,9 @@ Eliminar un paquete que aún no se ha recogido
 @param nguia string
 return string
 '''
-def delete_evento_paquete_guia (usua_id, nguia):
+
+
+def delete_evento_paquete_guia(usua_id, nguia):
     paquete = get_paquete_numero_guia_cliente_id(nguia, usua_id)
     if not paquete:
         return f"\U0000274C No existe un paquete para el número de guía indicado."
@@ -414,14 +416,15 @@ def crear_evento_generado(paquete_id, fecha, creado_el):
 
 
 '''
-Obtiene los estados de los paquetes de forma ordenada
+Valida que el cliente pueda crear un nuevo paquete. Debido a que solo puede crear 10
+paquetes por hora
+@return boolean True si puede crearlos, False si no
 '''
 
 
-def obtener_estados_paquete_ordenados(paquete_id):
-    eventos = db.session.query(Evento, Estado)\
-        .join(Estado, Evento.estado_id == Estado.id)\
-        .filter(Evento.paquete_id == paquete_id)\
-        .order_by(Estado.orden.desc())\
-        .all()
-    return eventos
+def puede_crear_nuevo_paquete(cliente_id):
+    fechaBusqueda = datetime.now() - timedelta(hours=1)
+    cantidadPaquetes = db.session.query(Paquete)\
+        .filter(Paquete.cliente_id == cliente_id, Paquete.creado_el >= fechaBusqueda)\
+        .count()
+    return cantidadPaquetes < Cliente.CANTIDAD_PAQUETES_HORA

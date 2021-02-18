@@ -144,9 +144,12 @@ Encargado de recibir la petición de "Registrar un paquete" como cliente
 
 @bot.callback_query_handler(lambda call: call.data == "opcion-2")
 def en_registrar_paquete(call):
-    pregunta = '¿A quién le vas a enviar el paquete?'
-    markup = telebot.types.ForceReply(selective=False)
-    bot.send_message(call.message.chat.id, pregunta, reply_markup=markup)
+    if logic.puede_crear_nuevo_paquete(call.from_user.id):
+        pregunta = '¿A quién le vas a enviar el paquete?'
+        markup = telebot.types.ForceReply(selective=False)
+        bot.send_message(call.message.chat.id, pregunta, reply_markup=markup)
+    else:
+        bot.send_message(call.message.chat.id, "Solo puedes ingresar 10 paquetes por hora \U00002639. Por favor reintenta más tarde")
 
 
 '''

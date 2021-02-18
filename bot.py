@@ -238,6 +238,7 @@ def en_listar_mis_paquetes(call):
 
     text = ""
     for paq in paquetes:
+        text += f"*Número de guía:* {paq.numero_guia} \n"
         text += f"*Fecha de creación:* {paq.creado_el} \n"
         text += f"*Dirección de destino:* {paq.direccion_destino} \n"
         text += f"*Remitente:* {paq.nombre_remitente} \n"
@@ -249,7 +250,6 @@ def en_listar_mis_paquetes(call):
 '''
 Encargado de recibir la petición de "Rastrear un paquete" como cliente
 '''
-
 
 @bot.callback_query_handler(lambda call: call.data == "opcion-4")
 def en_rastrear_un_paquete(call):
@@ -287,7 +287,7 @@ def en_rastrear_paquete_guia(mensaje):
     else:
         bot.send_message(
             mensaje.chat.id, f"No existe un paquete para este número de guía *{mensaje.text}* \U00002639",parse_mode="Markdown")
-
+ 
 
 '''
 Encargado de recibir la petición de "Cancelar un paquete" como cliente
@@ -307,9 +307,9 @@ Encargado de recibir la respuesta de "Digite el número de guía del paquete que
 
 
 @bot.message_handler(func=lambda message: message.reply_to_message != None and message.reply_to_message.text == "Digite el número de guía del paquete que desea cancelar")
-def en_cancelar_paquete(message):
+def en_cancelar_un_paquete_guia(message):
     nguia = message.text
-    resp = logic.evento_paquete_guia(message.chat.id, nguia)
+    resp = logic.delete_evento_paquete_guia(message.chat.id, nguia)
     if resp == RESPUESTA_OK:
         markup = logic.construir_opciones_estado()
         bot.send_message(
@@ -386,18 +386,16 @@ def en_cambiar_estado_paquete_estado(call):
     markup = telebot.types.ForceReply(selective=False)
     resp = logic.update_evento_estado_id(call.message.chat.id, call.data)
     if resp == RESPUESTA_OK:
-        bot.send_message(
-            call.message.chat.id, text="¿Cuál es la fecha y la hora en la que se cambió de estado el paquete?(YYYY-MM-DD HH:mm)", reply_markup=markup)
+        bot.send_message(call.message.chat.id, text="¿Cuál es la fecha y la hora en la que se cambió de estado el paquete?(yyyy-MM-dd HH:mm)", reply_markup=markup)
     else:
         bot.send_message(call.message.chat.id, resp, parse_mode="Markdown")
 
 
 '''
-Encargado de recibir la respuesta de "¿Cuál es la fecha y la hora en la que se cambió de estado el paquete?(YYYY-MM-DD HH:mm)"
+Encargado de recibir la respuesta de "¿Cuál es la fecha y la hora en la que se cambió de estado el paquete?(yyyy-MM-dd HH:mm)"
 '''
 
-
-@bot.message_handler(func=lambda message: message.reply_to_message != None and message.reply_to_message.text == "¿Cuál es la fecha y la hora en la que se cambió de estado el paquete?(YYYY-MM-DD HH:mm)")
+@bot.message_handler(func=lambda message: message.reply_to_message != None and message.reply_to_message.text == "¿Cuál es la fecha y la hora en la que se cambió de estado el paquete?(yyyy-MM-dd HH:mm)")
 def en_cambiar_estado_paquete_fecha(message):
     parts = re.match(
         r"^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{1,2}):([0-9]{1,2})$",
@@ -409,8 +407,7 @@ def en_cambiar_estado_paquete_fecha(message):
             message.chat.id, f"\U00002705 Se ha cambiado el estado del paquete con éxito.", parse_mode="Markdown")
     else:
         bot.reply_to(message, resp, parse_mode="Markdown")
-        bot.send_message(message.chat.id, text="¿Cuál es la fecha y la hora en la que se cambió de estado el paquete?(YYYY-MM-DD HH:mm)",
-                         reply_markup=telebot.types.ForceReply(selective=False))
+        bot.send_message(message.chat.id, text="¿Cuál es la fecha y la hora en la que se cambió de estado el paquete?(yyyy-MM-dd HH:mm)", reply_markup=telebot.types.ForceReply(selective=False))
 
 
 '''

@@ -145,7 +145,7 @@ Encargado de listar los paqueres con rol administrador
 
 def listar_paquetes():
     paquetes = db.session.query(Paquete).filter(
-        Paquete.estado_actual != 6
+        Paquete.estado_actual != ID_ENTREGADO
     ).order_by(Paquete.creado_el.asc()).all()
 
     return paquetes
@@ -230,7 +230,7 @@ def update_evento_estado_id(usua_id, estado_id):
 
     paquete = evento.paquete
 
-    if estado_id == paquete.estado_actual:
+    if int(estado_id) == paquete.estado_actual:
         return f"\U0000274C El paquete ya se encuentra en este estado, se debe cambiar a un estado diferente."
 
     evento.estado_id = estado_id
@@ -372,9 +372,7 @@ Eliminar un paquete que aún no se ha recogido
 @param nguia string
 return string
 '''
-
-
-def evento_paquete_guia(usua_id, nguia):
+def delete_evento_paquete_guia (usua_id, nguia):
     paquete = get_paquete_numero_guia_cliente_id(nguia, usua_id)
     if not paquete:
         return f"\U0000274C No existe un paquete para el número de guía indicado."

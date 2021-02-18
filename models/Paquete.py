@@ -19,7 +19,7 @@ class Paquete(db.Base):
     
     estado_actual = Column('estado_actual', Integer, ForeignKey('estado.id', onupdate='CASCADE', ondelete='CASCADE'), nullable=True)
     estado_actual_objeto	= relationship("Estado", back_populates="paquetes_estado_actual")
-    eventos = relationship("Evento", back_populates="paquete")
+    eventos = relationship("Evento", back_populates="paquete",order_by="desc(Evento.fecha)")
     def __init__ (self,cliente_id):
         self.cliente_id = cliente_id
     def __repr__ (self):

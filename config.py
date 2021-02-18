@@ -1,9 +1,15 @@
 import telebot
 import logging
+import locale
+import time
+from datetime import datetime,timedelta
 from decouple import config
 
 #########################################################
-
+try:
+    locale.setlocale(locale.LC_TIME, "es_CO.utf8") 
+except:
+    print("No pude configurar localización")
 # Versión del bot
 
 VERSION = 0.1

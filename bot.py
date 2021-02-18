@@ -10,6 +10,7 @@ import telebot
 from models.Estado import Estado
 from datetime import datetime
 import validadores
+import ayudadores
 
 RESPUESTA_OK = "OK"
 #########################################################
@@ -113,6 +114,7 @@ def en_registrarse_telefono(mensaje):
         markup = telebot.types.ForceReply(selective=False)
         bot.send_message(mensaje.chat.id, pregunta, reply_markup=markup)
 
+
 '''
 Encargado de recibir la respuesta a la pregunta "¿Cuál es tu email?"
 '''
@@ -133,6 +135,7 @@ def en_registrarse_email(mensaje):
         pregunta = '¿Cuál es tu email?'
         markup = telebot.types.ForceReply(selective=False)
         bot.send_message(mensaje.chat.id, pregunta, reply_markup=markup)
+
 
 '''
 Encargado de recibir la petición de "Registrar un paquete" como cliente
@@ -214,9 +217,9 @@ def en_registrar_paquete_direccion_recogida(mensaje):
     datos = {'direccion_recogida': mensaje.text, 'estado_actual': Estado.ESTADO_GENERADO,
              'creado_el': fecha, 'fecha_estado_actual': fecha, 'numero_guia': logic.generar_numero_guia()}
     logic.actualizar_datos_modelo(paquete, datos)
-    logic.crear_evento_generado(paquete.id,fecha,fecha)
+    logic.crear_evento_generado(paquete.id, fecha, fecha)
     respuesta = f"Hemos registrado tu paquete exitosamente \U0001F603. El número de guía es: *{paquete.numero_guia}*"
-    bot.send_message(mensaje.chat.id, respuesta,parse_mode="Markdown")
+    bot.send_message(mensaje.chat.id, respuesta, parse_mode="Markdown")
 
 
 '''
@@ -228,8 +231,9 @@ Encargado de recibir la petición de "Listar mis paquetes" como cliente
 def en_listar_mis_paquetes(call):
     paquetes = logic.listar_mis_paquetes(call.message.chat.id)
 
-    if len(paquetes) == 0 :
-        bot.send_message(call.message.chat.id, f"Usted no ha registrado paquetes \U0001F609")
+    if len(paquetes) == 0:
+        bot.send_message(call.message.chat.id,
+                         f"Usted no ha registrado paquetes \U0001F609")
         return
 
     text = ""
@@ -240,6 +244,8 @@ def en_listar_mis_paquetes(call):
         text += f"*Estado actual:* {paq.estado_actual_objeto.nombre} \n"
         text += f"*Fecha del estado actual:* {paq.fecha_estado_actual} \n\n"
     bot.send_message(call.message.chat.id, text, parse_mode="Markdown")
+
+
 '''
 Encargado de recibir la petición de "Rastrear un paquete" como cliente
 '''
@@ -247,7 +253,40 @@ Encargado de recibir la petición de "Rastrear un paquete" como cliente
 
 @bot.callback_query_handler(lambda call: call.data == "opcion-4")
 def en_rastrear_un_paquete(call):
-    pass
+    pregunta = '¿Cuál es el número de guía de tu paquete?'
+    markup = telebot.types.ForceReply(selective=False)
+    bot.send_message(call.message.chat.id, pregunta, reply_markup=markup)
+
+
+'''
+Encargado de recibir la respuesta a la pregunta "¿En kilogramos cuánto pesa tu paquete?"
+'''
+
+
+@bot.message_handler(func=lambda message: message.reply_to_message != None and message.reply_to_message.text == "¿Cuál es el número de guía de tu paquete?")
+def en_rastrear_paquete_guia(mensaje):
+    bot.send_chat_action(mensaje.chat.id, 'typing')
+    paquete = logic.get_paquete_numero_guia(mensaje.text)
+    if paquete:
+        informacion = ""
+        informacion += f"*Número de guía:* {paquete.numero_guia} \n"
+        informacion += f"*Remitente:* {paquete.nombre_remitente} \n"
+        informacion += f"*Peso en kg:* {ayudadores.formato_decimal(paquete.peso_kg,2)} \n"
+        informacion += f"*Dirección destino:* {paquete.direccion_destino} \n"
+        informacion += f"*Dirección recogida:* {paquete.direccion_recogida} \n"
+        informacion += f"*Estado actual:* {paquete.estado_actual_objeto.nombre} \n"
+        informacion += f"*Fecha del estado actual:* {ayudadores.formato_fecha_bonita(paquete.fecha_estado_actual)} \n"
+        informacion += f"*Fecha de creación:* {ayudadores.formato_fecha_bonita(paquete.creado_el)} \n\n"
+        informacion += f"*Estados:* \n"
+        eventos = paquete.eventos
+        indice = len(eventos)
+        for evento in eventos:
+            informacion+= f"{indice}. *{evento.estado.nombre}* el {ayudadores.formato_fecha_bonita(evento.fecha)} \n"
+            indice-=1
+        bot.send_message(mensaje.chat.id, informacion, parse_mode="Markdown")
+    else:
+        bot.send_message(
+            mensaje.chat.id, f"No existe un paquete para este número de guía *{mensaje.text}* \U00002639",parse_mode="Markdown")
 
 
 '''
@@ -258,11 +297,14 @@ Encargado de recibir la petición de "Cancelar un paquete" como cliente
 @bot.callback_query_handler(lambda call: call.data == "opcion-5")
 def en_cancelar_un_paquete(call):
     markup = telebot.types.ForceReply(selective=False)
-    bot.send_message(call.message.chat.id, text="Digite el número de guía del paquete que desea cancelar", reply_markup=markup)
+    bot.send_message(call.message.chat.id,
+                     text="Digite el número de guía del paquete que desea cancelar", reply_markup=markup)
+
 
 '''
 Encargado de recibir la respuesta de "Digite el número de guía del paquete que desea cancelar"
 '''
+
 
 @bot.message_handler(func=lambda message: message.reply_to_message != None and message.reply_to_message.text == "Digite el número de guía del paquete que desea cancelar")
 def en_cancelar_paquete(message):
@@ -270,10 +312,10 @@ def en_cancelar_paquete(message):
     resp = logic.evento_paquete_guia(message.chat.id, nguia)
     if resp == RESPUESTA_OK:
         markup = logic.construir_opciones_estado()
-        bot.send_message(message.chat.id, f"\U00002705 Paquete eliminado correctamente.", parse_mode="Markdown")
+        bot.send_message(
+            message.chat.id, f"\U00002705 Paquete eliminado correctamente.", parse_mode="Markdown")
     else:
         bot.send_message(message.chat.id, resp, parse_mode="Markdown")
-
 
 
 '''
@@ -285,8 +327,9 @@ Encargado de recibir la petición de "Listar paquetes" como usuario
 def en_listar_paquetes(call):
     paquetes = logic.listar_paquetes()
 
-    if len(paquetes) == 0 :
-        bot.send_message(call.message.chat.id, f"No se encuentran paquetes sin entregar \U0001F609")
+    if len(paquetes) == 0:
+        bot.send_message(call.message.chat.id,
+                         f"No se encuentran paquetes sin entregar \U0001F609")
         return
 
     text = ""
@@ -312,11 +355,14 @@ Encargado de recibir la petición de "Cambiar estado a un paquete" como usuario
 @bot.callback_query_handler(lambda call: call.data == "opcion-7")
 def en_cambiar_estado_paquete(call):
     markup = telebot.types.ForceReply(selective=False)
-    bot.send_message(call.message.chat.id, text="Digite el número de guía del paquete al que deseas cambiar el estado", reply_markup=markup)
+    bot.send_message(call.message.chat.id,
+                     text="Digite el número de guía del paquete al que deseas cambiar el estado", reply_markup=markup)
+
 
 '''
 Encargado de recibir la respuesta de "Digite el número de guía del paquete al que deseas cambiar el estado"
 '''
+
 
 @bot.message_handler(func=lambda message: message.reply_to_message != None and message.reply_to_message.text == "Digite el número de guía del paquete al que deseas cambiar el estado")
 def en_cambiar_estado_paquete_guia(message):
@@ -324,7 +370,8 @@ def en_cambiar_estado_paquete_guia(message):
     resp = logic.evento_paquete_guia(message.chat.id, nguia)
     if resp == RESPUESTA_OK:
         markup = logic.construir_opciones_estado()
-        bot.send_message(message.chat.id, text="¿A qué estado quieres cambiar el paquete?", reply_markup=markup)
+        bot.send_message(
+            message.chat.id, text="¿A qué estado quieres cambiar el paquete?", reply_markup=markup)
     else:
         bot.send_message(message.chat.id, resp, parse_mode="Markdown")
 
@@ -333,31 +380,37 @@ def en_cambiar_estado_paquete_guia(message):
 Encargado de recibir la respuesta de "¿A qué estado quieres cambiar el paquete?"
 '''
 
+
 @bot.callback_query_handler(lambda call: call.message != None and call.message.text == "¿A qué estado quieres cambiar el paquete?")
 def en_cambiar_estado_paquete_estado(call):
     markup = telebot.types.ForceReply(selective=False)
     resp = logic.update_evento_estado_id(call.message.chat.id, call.data)
     if resp == RESPUESTA_OK:
-        bot.send_message(call.message.chat.id, text="¿Cuál es la fecha y la hora en la que se cambió de estado el paquete?(YYYY-MM-DD HH:mm)", reply_markup=markup)
+        bot.send_message(
+            call.message.chat.id, text="¿Cuál es la fecha y la hora en la que se cambió de estado el paquete?(YYYY-MM-DD HH:mm)", reply_markup=markup)
     else:
         bot.send_message(call.message.chat.id, resp, parse_mode="Markdown")
+
 
 '''
 Encargado de recibir la respuesta de "¿Cuál es la fecha y la hora en la que se cambió de estado el paquete?(YYYY-MM-DD HH:mm)"
 '''
 
+
 @bot.message_handler(func=lambda message: message.reply_to_message != None and message.reply_to_message.text == "¿Cuál es la fecha y la hora en la que se cambió de estado el paquete?(YYYY-MM-DD HH:mm)")
 def en_cambiar_estado_paquete_fecha(message):
     parts = re.match(
-        r"^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{1,2}):([0-9]{1,2})$", 
+        r"^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{1,2}):([0-9]{1,2})$",
         message.text,
         re.IGNORECASE)
     resp = logic.update_evento_fecha(message.chat.id, parts)
     if resp == RESPUESTA_OK:
-        bot.send_message(message.chat.id, f"\U00002705 Se ha cambiado el estado del paquete con éxito.", parse_mode="Markdown")
+        bot.send_message(
+            message.chat.id, f"\U00002705 Se ha cambiado el estado del paquete con éxito.", parse_mode="Markdown")
     else:
         bot.reply_to(message, resp, parse_mode="Markdown")
-        bot.send_message(message.chat.id, text="¿Cuál es la fecha y la hora en la que se cambió de estado el paquete?(YYYY-MM-DD HH:mm)", reply_markup=telebot.types.ForceReply(selective=False))
+        bot.send_message(message.chat.id, text="¿Cuál es la fecha y la hora en la que se cambió de estado el paquete?(YYYY-MM-DD HH:mm)",
+                         reply_markup=telebot.types.ForceReply(selective=False))
 
 
 '''

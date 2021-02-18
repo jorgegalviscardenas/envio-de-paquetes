@@ -10,13 +10,13 @@ que va a procesar el bot.
 @version 20210209
 '''
 import database.db as db
-from sqlalchemy import desc
+from sqlalchemy import desc,func
 from models.Evento import Evento
 from models.Cliente import Cliente
 from models.Estado import Estado
 from models.Paquete import Paquete
 from models.Usuario import Usuario
-from datetime import datetime
+from datetime import datetime,timedelta
 import telebot
 import random
 import string
@@ -150,16 +150,18 @@ def listar_paquetes():
 
     return paquetes
 
+
 '''
 Obtiene los paquetes de un determinado cliente
 @param string id identificador del cliente
 @return listado de paquetes del cliente
 '''
 
+
 def listar_mis_paquetes(id):
     paquetes = db.session.query(Paquete).filter(
         Paquete.cliente_id == id,
-        Paquete.estado_actual_objeto!=None
+        Paquete.estado_actual_objeto != None
     ).order_by(Paquete.estado_actual.asc()).order_by(Paquete.creado_el.asc()).all()
     return paquetes
 
@@ -175,13 +177,16 @@ def get_fallback_message(text):
     response = f"\U0001F648 No entendí lo que me acabas de decir"
     return response
 
+
 '''
 Generar un evento para un paquete que aún no se encuentra entregado
 @param usua_id integer
 @param nguia string
 return string
 '''
-def evento_paquete_guia (usua_id, nguia):
+
+
+def evento_paquete_guia(usua_id, nguia):
     paquete = get_paquete_numero_guia(nguia)
     if not paquete:
         return f"\U0000274C No existe un paquete para el número de guía indicado."
@@ -189,8 +194,8 @@ def evento_paquete_guia (usua_id, nguia):
         return f"\U0000274C Este paquete ya se encuentra entregado y no se le pueden agregar más eventos."
 
     evento = get_evento_id_creado_por_paquete_id(usua_id, paquete.id)
-    #valida si un evento ya existe para no crear varios eventos incompletos
-    if not evento:    
+    # valida si un evento ya existe para no crear varios eventos incompletos
+    if not evento:
         evento = Evento(
             None,
             datetime.now(),
@@ -199,9 +204,9 @@ def evento_paquete_guia (usua_id, nguia):
             paquete.id)
 
         db.session.add(evento)
-        
+
         db.session.commit()
-     
+
     else:
         evento.creado_el = datetime.now()
 
@@ -209,13 +214,16 @@ def evento_paquete_guia (usua_id, nguia):
 
     return "OK"
 
+
 '''
 Actualizar un evento de un usuario para asignarle un estado
 @param usua_id integer
 @param estado_id integer
 return boolean
 '''
-def update_evento_estado_id (usua_id, estado_id):
+
+
+def update_evento_estado_id(usua_id, estado_id):
     evento = get_evento_creado_por(usua_id)
     if not evento:
         return f"\U0000274C No se encuentra un evento para el usuario, intente iniciar de nuevo."
@@ -226,10 +234,11 @@ def update_evento_estado_id (usua_id, estado_id):
         return f"\U0000274C El paquete ya se encuentra en este estado, se debe cambiar a un estado diferente."
 
     evento.estado_id = estado_id
-    
+
     db.session.commit()
 
     return "OK"
+
 
 '''
 Actualizar un evento de un usuario para asignarle la fecha
@@ -237,14 +246,17 @@ Actualizar un evento de un usuario para asignarle la fecha
 @param arrFecha Array<string>
 return boolean
 '''
-def update_evento_fecha (usua_id, arrFecha):
+
+
+def update_evento_fecha(usua_id, arrFecha):
     evento = get_evento_creado_por(usua_id)
     if not evento:
         return f"\U0000274C Error, asegúrese de estar cambiando el estado de un solo paquete y vuelva a intentarlo."
 
     paquete = evento.paquete
     try:
-        evento.fecha = datetime(int(arrFecha[1]),int(arrFecha[2]),int(arrFecha[3]),int(arrFecha[4]),int(arrFecha[5]),0)
+        evento.fecha = datetime(int(arrFecha[1]), int(arrFecha[2]), int(
+            arrFecha[3]), int(arrFecha[4]), int(arrFecha[5]), 0)
     except:
         return f"\U0000274C Error, asegúrese de estar ingresando la fecha en el formato (yyyy-MM-dd HH:mm)\U0000274C"
 
@@ -256,33 +268,40 @@ def update_evento_fecha (usua_id, arrFecha):
 
     return "OK"
 
+
 '''
 Obtener un paquete por número de guia
 @param numero_guia string 
 @return Paquete
 '''
-def get_paquete_numero_guia (nguia):
+
+
+def get_paquete_numero_guia(nguia):
     paquete = db.session.query(Paquete
-        ).filter_by(numero_guia=nguia
-        ).first()
-    
+                               ).filter_by(numero_guia=nguia
+                                           ).first()
+
     db.session.commit()
 
     return paquete
+
 
 '''
 Obtener un paquete por id
 @param paquete_id integer 
 @return Paquete
 '''
-def get_paquete_id (paquete_id):
+
+
+def get_paquete_id(paquete_id):
     paquete = db.session.query(Paquete
-        ).filter_by(id=paquete_id
-        ).first()
-    
+                               ).filter_by(id=paquete_id
+                                           ).first()
+
     db.session.commit()
 
     return paquete
+
 
 '''
 Obtener un evento por creado_por y que el campo 
@@ -290,16 +309,19 @@ creado_el se encuentre vacio
 @param usua_id integer
 return Evento
 '''
+
+
 def get_evento_creado_por(usua_id):
     evento = db.session.query(Evento
-        ).filter_by(creado_por=usua_id
-        ).filter_by(fecha=None
-        ).order_by(desc(Evento.creado_el)
-        ).first()
+                              ).filter_by(creado_por=usua_id
+                                          ).filter_by(fecha=None
+                                                      ).order_by(desc(Evento.creado_el)
+                                                                 ).first()
 
     db.session.commit()
-    
+
     return evento
+
 
 '''
 Obtener un evento por id, paquete_id y creado_por
@@ -309,17 +331,19 @@ para identificar el evento que se está editando
 @param paquete_id integer
 return Evento
 '''
+
+
 def get_evento_id_creado_por_paquete_id(usua_id, paquete_id):
     evento = db.session.query(Evento
-        ).filter_by(creado_por=usua_id
-        ).filter_by(paquete_id=paquete_id
-        ).filter_by(fecha=None
-        ).filter_by(estado_id=None
-        ).order_by(desc(Evento.creado_el)
-        ).first()
+                              ).filter_by(creado_por=usua_id
+                                          ).filter_by(paquete_id=paquete_id
+                                                      ).filter_by(fecha=None
+                                                                  ).filter_by(estado_id=None
+                                                                              ).order_by(desc(Evento.creado_el)
+                                                                                         ).first()
 
     db.session.commit()
-    
+
     return evento
 
 
@@ -329,15 +353,18 @@ Obtener un paquete por número de guia e id de usuario
 @param cliente_id string
 @return Paquete
 '''
-def get_paquete_numero_guia_cliente_id (nguia, cliente_id):
+
+
+def get_paquete_numero_guia_cliente_id(nguia, cliente_id):
     paquete = db.session.query(Paquete
-        ).filter_by(numero_guia=nguia
-        ).filter_by(cliente_id=cliente_id
-        ).first()
-    
+                               ).filter_by(numero_guia=nguia
+                                           ).filter_by(cliente_id=cliente_id
+                                                       ).first()
+
     db.session.commit()
 
     return paquete
+
 
 '''
 Eliminar un paquete que aún no se ha recogido
@@ -345,40 +372,58 @@ Eliminar un paquete que aún no se ha recogido
 @param nguia string
 return string
 '''
-def evento_paquete_guia (usua_id, nguia):
+
+
+def evento_paquete_guia(usua_id, nguia):
     paquete = get_paquete_numero_guia_cliente_id(nguia, usua_id)
     if not paquete:
         return f"\U0000274C No existe un paquete para el número de guía indicado."
     if paquete.estado_actual != ID_GENERADO and paquete.estado_actual != ID_ASIGNADO:
         return f"\U0000274C El paquete con número de guía {paquete.numero_guia} no se puede eliminar ya que se encuentra en estado {paquete.estado_actual_objeto.nombre}."
-
-
-    #Elimino los eventos relacionados al paquete
+    # Elimino los eventos relacionados al paquete
     db.session.query(Evento
-        ).filter_by(paquete_id=paquete.id
-        ).delete()
+                     ).filter_by(paquete_id=paquete.id
+                                 ).delete()
     db.session.commit()
 
-    #Elimino el paquete
+    # Elimino el paquete
     db.session.delete(paquete)
     db.session.commit()
 
     return "OK"
+
+
 '''
 Crea el evento de generado para un paquete
 @param integer paquete_id identificador del paquete
 @param datetime fecha fecha en la que se asignó el estado
 @param datetime creado_el fecha en la que se creó el registro
 '''
-def crear_evento_generado(paquete_id,fecha,creado_el):
+
+
+def crear_evento_generado(paquete_id, fecha, creado_el):
     evento = Evento(
-    fecha,
-    creado_el,
-    Estado.ESTADO_GENERADO,
-    None,
-    paquete_id)
+        fecha,
+        creado_el,
+        Estado.ESTADO_GENERADO,
+        None,
+        paquete_id)
     db.session.add(evento)
-        
+
     db.session.commit()
 
     return evento
+
+
+'''
+Obtiene los estados de los paquetes de forma ordenada
+'''
+
+
+def obtener_estados_paquete_ordenados(paquete_id):
+    eventos = db.session.query(Evento, Estado)\
+        .join(Estado, Evento.estado_id == Estado.id)\
+        .filter(Evento.paquete_id == paquete_id)\
+        .order_by(Estado.orden.desc())\
+        .all()
+    return eventos

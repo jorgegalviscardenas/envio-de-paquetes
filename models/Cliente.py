@@ -1,6 +1,6 @@
 import database.db as db
 from sqlalchemy import Column, String, Float, Date, DateTime, ForeignKey, func
-from sqlalchemy.orm import relationship 
+from sqlalchemy.orm import relationship
 import telebot
 '''
 Representa un cliente que envia paquetes
@@ -12,22 +12,33 @@ Representa un cliente que envia paquetes
 
 @version 20210211
 '''
-class Cliente(db.Base):
-    __tablename__ 	= 'cliente'
 
-    id	= Column('id', String(15), primary_key=True, nullable=False)  
+
+class Cliente(db.Base):
+    '''
+    @var string Nombre de la tabla asociada al modelo
+    '''
+    __tablename__ = 'cliente'
+    '''
+    @var integer Identificador en la base de datos
+    '''
+    id = Column('id', String(15), primary_key=True, nullable=False)
     nombres = Column('nombres', String(50), nullable=False)
-    apellidos = Column('apellidos', String(50), nullable=True)  
-    documento = Column('documento', String(20), nullable=True,unique=True) 
-    email = Column('email', String(200), nullable=True) 
-    telefono = Column('telefono', String(15), nullable=True) 
+    apellidos = Column('apellidos', String(50), nullable=True)
+    documento = Column('documento', String(20), nullable=True, unique=True)
+    email = Column('email', String(200), nullable=True)
+    telefono = Column('telefono', String(15), nullable=True)
     paquetes = relationship("Paquete", back_populates="cliente")
-    def __init__ (self, id, nombres,apellidos): 
+    '''
+    @const integer cantidad maxima de paquetes que puede crear un usuario en una hora
+    '''
+    CANTIDAD_PAQUETES_HORA = 10
+    def __init__(self, id, nombres, apellidos):
         self.id = id
-        self.nombres = nombres 
+        self.nombres = nombres
         self.apellidos = apellidos
 
-    def __repr__ (self):
+    def __repr__(self):
         return f"<Cliente {self.id}>"
     '''
     Se encarga de construir el menú como cliente. Si el cliente tiene los datos completas le muestra
@@ -35,13 +46,19 @@ class Cliente(db.Base):
     opción de "Registrarse"
     @return InlineKeyboardMarkup contenedor de las opciones
     '''
+
     def construir_menu(self):
         markup = telebot.types.InlineKeyboardMarkup()
         if(self.documento != None and self.email != None and self.telefono != None):
-            markup.add(telebot.types.InlineKeyboardButton(text='Registrar un paquete', callback_data="opcion-2"))
-            markup.add(telebot.types.InlineKeyboardButton(text='Listar mis paquetes', callback_data="opcion-3"))
-            markup.add(telebot.types.InlineKeyboardButton(text='Rastrear un paquete', callback_data="opcion-4"))
-            markup.add(telebot.types.InlineKeyboardButton(text='Cancelar un paquete', callback_data="opcion-5"))
+            markup.add(telebot.types.InlineKeyboardButton(
+                text='Registrar un paquete', callback_data="opcion-2"))
+            markup.add(telebot.types.InlineKeyboardButton(
+                text='Listar mis paquetes', callback_data="opcion-3"))
+            markup.add(telebot.types.InlineKeyboardButton(
+                text='Rastrear un paquete', callback_data="opcion-4"))
+            markup.add(telebot.types.InlineKeyboardButton(
+                text='Cancelar un paquete', callback_data="opcion-5"))
         else:
-            markup.add(telebot.types.InlineKeyboardButton(text='Registrarse', callback_data="opcion-1"))
+            markup.add(telebot.types.InlineKeyboardButton(
+                text='Registrarse', callback_data="opcion-1"))
         return markup

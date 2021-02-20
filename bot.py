@@ -314,7 +314,6 @@ def en_cancelar_un_paquete_guia(message):
     nguia = message.text
     resp = logic.delete_evento_paquete_guia(message.chat.id, nguia)
     if resp == RESPUESTA_OK:
-        markup = logic.construir_opciones_estado()
         bot.send_message(
             message.chat.id, f"\U00002705 Paquete eliminado correctamente.", parse_mode="Markdown")
     else:

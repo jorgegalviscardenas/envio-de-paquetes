@@ -21,10 +21,6 @@ import telebot
 import random
 import string
 
-ID_ENTREGADO = 6
-ID_GENERADO = 1
-ID_ASIGNADO = 2
-
 '''
 Construye el menú de acuerdo si es un usuario del sistema o un cliente
 @param string id identificador del usuario
@@ -145,7 +141,7 @@ Encargado de listar los paqueres con rol administrador
 
 def listar_paquetes():
     paquetes = db.session.query(Paquete).filter(
-        Paquete.estado_actual != ID_ENTREGADO
+        Paquete.estado_actual != Estado.ESTADO_ENTREGADO
     ).order_by(Paquete.creado_el.asc()).all()
 
     return paquetes
@@ -190,7 +186,7 @@ def evento_paquete_guia(usua_id, nguia):
     paquete = get_paquete_numero_guia(nguia)
     if not paquete:
         return f"\U0000274C No existe un paquete para el número de guía indicado."
-    if paquete.estado_actual == ID_ENTREGADO:
+    if paquete.estado_actual == Estado.ESTADO_ENTREGADO:
         return f"\U0000274C Este paquete ya se encuentra entregado y no se le pueden agregar más eventos."
 
     evento = get_evento_id_creado_por_paquete_id(usua_id, paquete.id)
@@ -378,7 +374,7 @@ def delete_evento_paquete_guia(usua_id, nguia):
     paquete = get_paquete_numero_guia_cliente_id(nguia, usua_id)
     if not paquete:
         return f"\U0000274C No existe un paquete para el número de guía indicado."
-    if paquete.estado_actual != ID_GENERADO and paquete.estado_actual != ID_ASIGNADO:
+    if paquete.estado_actual != Estado.ESTADO_GENERADO and paquete.estado_actual != Estado.ESTADO_ASIGNADO:
         return f"\U0000274C El paquete con número de guía {paquete.numero_guia} no se puede eliminar ya que se encuentra en estado {paquete.estado_actual_objeto.nombre}."
     # Elimino los eventos relacionados al paquete
     db.session.query(Evento

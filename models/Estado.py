@@ -41,6 +41,14 @@ class Estado(db.Base):
     '''
     ESTADO_GENERADO = 1
     '''
+    @const el identificador de un estado asignado
+    '''
+    ESTADO_ASIGNADO = 2
+    '''
+    @const el identificador de estado entregado
+    '''
+    ESTADO_ENTREGADO = 6
+    '''
     Constructor
     @param integer id Identificador del estado
     @param string nombre Nombre del estado

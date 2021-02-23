@@ -457,7 +457,6 @@ def en_eliminar_evento_paquete(call):
     markup = telebot.types.ForceReply(selective=False)
     evento_id = call.data
     paqueteNuevo = logic.delete_evento_paquete(evento_id)
-    print(paqueteNuevo)
     if not paqueteNuevo:
         bot.send_message(call.message.chat.id,f"\U0000274C Se ha presentado un error al eliminar el estado del paquete.", parse_mode="Markdown")
     else:

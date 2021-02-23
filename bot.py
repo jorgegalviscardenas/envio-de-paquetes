@@ -419,7 +419,51 @@ Encargado de recibir la petición de "Eliminar estado de un paquete" como usuari
 
 @bot.callback_query_handler(lambda call: call.data == "opcion-8")
 def en_eliminar_estado_paquete(call):
-    pass
+    markup = telebot.types.ForceReply(selective=False)
+    bot.send_message(call.message.chat.id,
+                     text="Digite el número de guía del paquete al que deseas eliminar un estado", reply_markup=markup)
+    
+
+'''
+Encargado de recibir la respuesta de "Digite el número de guía del paquete al que deseas eliminar un estado"
+'''
+
+@bot.message_handler(func=lambda message: message.reply_to_message != None and message.reply_to_message.text == "Digite el número de guía del paquete al que deseas eliminar un estado")
+def en_eventos_del_paquete(message):
+    nguia = message.text
+    paquete = logic.get_paguete_guia(nguia)
+    if not paquete:
+        bot.send_message(message.chat.id, f"\U0000274C No existe un paquete con el número de guía indicado", parse_mode="Markdown")
+        return
+    else: 
+        if not paquete.eventos or len(paquete.eventos) <= 1:
+            bot.send_message(message.chat.id, f"\U0000274C Este paquete no cuenta con estados para eliminar.", parse_mode="Markdown")        
+            return
+    
+    lista_eventos = logic.get_eventos_lista(paquete.eventos)
+    if not lista_eventos:
+        bot.send_message(message.chat.id, f"\U0000274C Este paquete no cuenta con estados para eliminar.", parse_mode="Markdown")        
+    else:        
+        bot.send_message(
+            message.chat.id, text="¿Cuál estado quieres eliminar?", reply_markup=lista_eventos)
+
+
+'''
+Encargado de recibir la respuesta de "¿Cuál estado quieres eliminar?"
+'''
+
+@bot.callback_query_handler(lambda call: call.message != None and call.message.text == "¿Cuál estado quieres eliminar?")
+def en_eliminar_evento_paquete(call):
+    markup = telebot.types.ForceReply(selective=False)
+    evento_id = call.data
+    paqueteNuevo = logic.delete_evento_paquete(evento_id)
+    print(paqueteNuevo)
+    if not paqueteNuevo:
+        bot.send_message(call.message.chat.id,f"\U0000274C Se ha presentado un error al eliminar el estado del paquete.", parse_mode="Markdown")
+    else:
+        bot.send_message(call.message.chat.id, 
+        text= f"\U00002705 Estado eliminado correctamente. El nuevo estado del paquete es ‘{paqueteNuevo.estado_actual_objeto.nombre}’ en la fecha: {ayudadores.formato_fecha_bonita(paqueteNuevo.fecha_estado_actual)}."
+        , parse_mode="Markdown")
 
 
 '''

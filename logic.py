@@ -20,6 +20,7 @@ from datetime import datetime, timedelta
 import telebot
 import random
 import string
+import ayudadores
 
 '''
 Construye el menú de acuerdo si es un usuario del sistema o un cliente
@@ -424,3 +425,87 @@ def puede_crear_nuevo_paquete(cliente_id):
         .filter(Paquete.cliente_id == cliente_id, Paquete.creado_el >= fechaBusqueda)\
         .count()
     return cantidadPaquetes < Cliente.CANTIDAD_PAQUETES_HORA
+
+'''
+Método que busca un paquete por número de guía.
+@param nguia string
+return Paquete
+'''
+
+def get_paguete_guia(nguia):
+    return get_paquete_numero_guia(nguia)
+
+'''
+Método que convierte una lista de Eventos ah una lista 
+de presentación al usuario.
+@param eventos List<Evento>
+@return Markup
+'''
+def get_eventos_lista(eventos):
+
+    markup = telebot.types.InlineKeyboardMarkup()
+    cantidadEventos = 0
+    for evento in eventos:
+        if evento.fecha:
+            cantidadEventos += 1
+            markup.add(telebot.types.InlineKeyboardButton(
+                text=evento.estado.nombre+' - '+ayudadores.formato_fecha_bonita(evento.fecha),
+                callback_data=evento.id))
+    
+    if cantidadEventos == 0:
+        return None
+    
+    return markup
+
+'''
+Eliminar un evento por su id y asignar nuevo estado 
+al paquete relacionado.
+@param evento_id integer
+return Paquete
+'''
+
+def delete_evento_paquete(evento_id):
+    evento = get_evento_creado_id(evento_id)
+    if not evento:
+        return  None
+    
+    paquete = evento.paquete
+    db.session.delete(evento)
+
+    eventoSiguiente = get_siguiente_evento_paquete(paquete.id)
+    paquete.estado_actual = eventoSiguiente.estado_id
+    paquete.fecha_estado_actual = eventoSiguiente.fecha
+
+    db.session.commit()
+    
+    return paquete
+
+
+'''
+Obtener un evento por su identificador
+@param evento_id integer
+return Evento
+'''
+
+def get_evento_creado_id (evento_id):
+    evento = db.session.query(Evento
+        ).filter_by(id = evento_id
+        ).first()
+    
+    db.session.commit()
+    return evento
+
+'''
+Obtener el siguiente evento que corresponde a un paquete
+@param paquete_id integer
+return Evento
+'''
+
+def get_siguiente_evento_paquete (paquete_id):
+    evento = db.session.query(Evento
+        ).filter_by(paquete_id = paquete_id
+        ).order_by(desc(Evento.fecha)
+        ).first()
+    
+    db.session.commit()
+    return evento

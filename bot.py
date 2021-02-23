@@ -13,6 +13,7 @@ import validadores
 import ayudadores
 
 RESPUESTA_OK = "OK"
+NUMERO_UNO = 1
 #########################################################
 # Aquí vendrá la implementación de la lógica del bot
 #########################################################
@@ -436,7 +437,7 @@ def en_eventos_del_paquete(message):
         bot.send_message(message.chat.id, f"\U0000274C No existe un paquete con el número de guía indicado", parse_mode="Markdown")
         return
     else: 
-        if not paquete.eventos or len(paquete.eventos) <= 1:
+        if not paquete.eventos or len(paquete.eventos) <= NUMERO_UNO:
             bot.send_message(message.chat.id, f"\U0000274C Este paquete no cuenta con estados para eliminar.", parse_mode="Markdown")        
             return
     
